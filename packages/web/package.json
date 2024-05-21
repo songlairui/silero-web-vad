@@ -1,6 +1,6 @@
 {
-  "name": "@ricky0123/vad-web",
-  "description": "Powerful, user-friendly voice activity detector (VAD) for the browser",
+  "name": "@slr/silero-vad-web",
+  "description": "modified on @ricky0123/vad-web, Powerful, user-friendly voice activity detector (VAD) for the browser",
   "keywords": [
     "speech-recognition",
     "wake-word-detection",
@@ -11,8 +11,8 @@
     "voice-control",
     "offline-speech-recognition"
   ],
-  "homepage": "https://github.com/ricky0123/vad",
-  "version": "0.0.17",
+  "homepage": "https://github.com/songlairui/silero-web-vad",
+  "version": "0.0.18",
   "license": "ISC",
   "main": "dist/index.js",
   "unpkg": "dist/bundle.min.js",
