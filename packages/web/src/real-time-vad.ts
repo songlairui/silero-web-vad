@@ -9,13 +9,14 @@ import {
   FrameProcessorOptions,
   OrtOptions,
   validateOptions,
+  TypeProcessResult,
 } from "./_common"
 import { assetPath } from "./asset-path"
 import { defaultModelFetcher } from "./default-model-fetcher"
 
 interface RealTimeVADCallbacks {
   /** Callback to run after each frame. The size (number of samples) of a frame is given by `frameSamples`. */
-  onFrameProcessed: (probabilities: SpeechProbabilities) => any
+  onFrameProcessed: (probabilities: SpeechProbabilities, ev: TypeProcessResult, stamp?: number) => any
 
   /** Callback to run if speech start was detected but `onSpeechEnd` will not be run because the
    * audio segment is smaller than `minSpeechFrames`.
@@ -50,18 +51,18 @@ type AssetOptions = {
 
 interface RealTimeVADOptionsWithoutStream
   extends FrameProcessorOptions,
-    RealTimeVADCallbacks,
-    OrtOptions,
-    AssetOptions {
+  RealTimeVADCallbacks,
+  OrtOptions,
+  AssetOptions {
   additionalAudioConstraints?: AudioConstraints
   stream: undefined
 }
 
 interface RealTimeVADOptionsWithStream
   extends FrameProcessorOptions,
-    RealTimeVADCallbacks,
-    OrtOptions,
-    AssetOptions {
+  RealTimeVADCallbacks,
+  OrtOptions,
+  AssetOptions {
   stream: MediaStream
 }
 
@@ -73,7 +74,7 @@ export type RealTimeVADOptions =
 
 export const defaultRealTimeVADOptions: RealTimeVADOptions = {
   ...defaultFrameProcessorOptions,
-  onFrameProcessed: (probabilities) => {},
+  onFrameProcessed: (probabilities) => { },
   onVADMisfire: () => {
     log.debug("VAD misfire")
   },
@@ -135,7 +136,7 @@ export class MicVAD {
     private audioNodeVAD: AudioNodeVAD,
     private sourceNode: MediaStreamAudioSourceNode,
     private listening = false
-  ) {}
+  ) { }
 
   pause = () => {
     this.audioNodeVAD.pause()
@@ -231,7 +232,7 @@ export class AudioNodeVAD {
         case Message.AudioFrame:
           const buffer: ArrayBuffer = ev.data.data
           const frame = new Float32Array(buffer)
-          await audioNodeVAD.processFrame(frame)
+          await audioNodeVAD.processFrame(frame, ev)
           break
 
         default:
@@ -247,7 +248,7 @@ export class AudioNodeVAD {
     public options: RealTimeVADOptions,
     private frameProcessor: FrameProcessor,
     private entryNode: AudioWorkletNode
-  ) {}
+  ) { }
 
   pause = () => {
     const ev = this.frameProcessor.pause()
@@ -262,20 +263,20 @@ export class AudioNodeVAD {
     node.connect(this.entryNode)
   }
 
-  processFrame = async (frame: Float32Array) => {
+  processFrame = async (frame: Float32Array, audioEv: MessageEvent) => {
     const ev = await this.frameProcessor.process(frame)
-    this.handleFrameProcessorEvent(ev)
+    this.handleFrameProcessorEvent(ev, audioEv.timeStamp)
   }
 
   handleFrameProcessorEvent = (
-    ev: Partial<{
-      probs: SpeechProbabilities
-      msg: Message
-      audio: Float32Array
-    }>
+    ev: TypeProcessResult,
+    stamp?: number
   ) => {
-    if (ev.probs !== undefined) {
-      this.options.onFrameProcessed(ev.probs)
+    if ('probs' in ev && ev.probs !== undefined) {
+      this.options.onFrameProcessed(ev.probs, ev, stamp)
+    }
+    if (!('msg' in ev)) {
+      return
     }
     switch (ev.msg) {
       case Message.SpeechStart:

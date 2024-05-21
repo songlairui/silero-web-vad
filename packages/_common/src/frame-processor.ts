@@ -85,13 +85,26 @@ export function validateOptions(options: FrameProcessorOptions) {
   }
 }
 
+export interface BufferChunk {
+  frame: Float32Array;
+  isSpeech: boolean;
+}
+
+export type TypeProcessResult = {} | (
+  {
+    probs: SpeechProbabilities,
+    chunk: BufferChunk;
+    aheadChunks?: BufferChunk[];
+  } & (
+    { msg: Message.SpeechStart } |
+    { msg: Message.VADMisfire } |
+    { msg: Message.SpeechEnd, audio: Float32Array }
+  )
+)
+
 export interface FrameProcessorInterface {
   resume: () => void
-  process: (arr: Float32Array) => Promise<{
-    probs?: SpeechProbabilities
-    msg?: Message
-    audio?: Float32Array
-  }>
+  process: (arr: Float32Array, stamp: number) => Promise<TypeProcessResult>
   endSegment: () => { msg?: Message; audio?: Float32Array }
 }
 
@@ -113,7 +126,8 @@ const concatArrays = (arrays: Float32Array[]): Float32Array => {
 
 export class FrameProcessor implements FrameProcessorInterface {
   speaking: boolean = false
-  audioBuffer: { frame: Float32Array; isSpeech: boolean }[]
+  /** 当前 chunk 所有 frames */
+  audioBuffer: { frame: Float32Array; isSpeech: boolean, stamp?: number }[]
   redemptionCounter = 0
   active = false
 
@@ -170,16 +184,35 @@ export class FrameProcessor implements FrameProcessorInterface {
     return {}
   }
 
-  process = async (frame: Float32Array) => {
+  async process(frame: Float32Array): Promise<TypeProcessResult> {
     if (!this.active) {
       return {}
     }
 
     const probs = await this.modelProcessFunc(frame)
-    this.audioBuffer.push({
+
+    const isSpeaking = probs.isSpeech >= this.options.positiveSpeechThreshold
+
+    const curChunk = {
       frame,
       isSpeech: probs.isSpeech >= this.options.positiveSpeechThreshold,
-    })
+    }
+
+    this.audioBuffer.push(curChunk)
+
+
+    const payload = {
+      chunk: undefined as BufferChunk | undefined,
+      aheadChunks: undefined as BufferChunk[] | undefined,
+    }
+
+    if (this.speaking || isSpeaking) {
+      payload.chunk = curChunk
+      // from slient to speaking, provide ahead_chunks
+      if (!this.speaking && isSpeaking) {
+        payload.aheadChunks = [...this.audioBuffer]
+      }
+    }
 
     if (
       probs.isSpeech >= this.options.positiveSpeechThreshold &&
@@ -193,7 +226,7 @@ export class FrameProcessor implements FrameProcessorInterface {
       !this.speaking
     ) {
       this.speaking = true
-      return { probs, msg: Message.SpeechStart }
+      return { probs, msg: Message.SpeechStart, ...payload }
     }
 
     if (
@@ -213,9 +246,9 @@ export class FrameProcessor implements FrameProcessorInterface {
 
       if (speechFrameCount >= this.options.minSpeechFrames) {
         const audio = concatArrays(audioBuffer.map((item) => item.frame))
-        return { probs, msg: Message.SpeechEnd, audio }
+        return { probs, msg: Message.SpeechEnd, audio, ...payload }
       } else {
-        return { probs, msg: Message.VADMisfire }
+        return { probs, msg: Message.VADMisfire, ...payload }
       }
     }
 
@@ -224,6 +257,6 @@ export class FrameProcessor implements FrameProcessorInterface {
         this.audioBuffer.shift()
       }
     }
-    return { probs }
+    return { probs, ...payload }
   }
 }
