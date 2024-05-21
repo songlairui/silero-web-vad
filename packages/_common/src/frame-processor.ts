@@ -209,7 +209,6 @@ export class FrameProcessor implements FrameProcessorInterface {
     }
 
     if (this.speaking || isSpeaking) {
-      console.info('[on]', this.speaking, isSpeaking)
       payload.chunk = curChunk
       // from slient to speaking, provide ahead_chunks
       if (!this.speaking && isSpeaking) {
