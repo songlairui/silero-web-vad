@@ -16,7 +16,7 @@ const defaultReactOptions: ReactOptions = {
   userSpeakingThreshold: 0.6,
 }
 
-export const defaultReactRealTimeVADOptions = {
+export const defaultReactRealTimeVADOptions: ReactRealTimeVADOptions  = {
   ...defaultRealTimeVADOptions,
   ...defaultReactOptions,
 }
@@ -67,9 +67,9 @@ export function useMicVAD(options: Partial<ReactRealTimeVADOptions>) {
   const [vad, setVAD] = useState<MicVAD | null>(null)
 
   const userOnFrameProcessed = useEventCallback(vadOptions.onFrameProcessed)
-  vadOptions.onFrameProcessed = useEventCallback((probs) => {
+  vadOptions.onFrameProcessed = useEventCallback((probs, ...args) => {
     updateUserSpeaking(probs.isSpeech)
-    userOnFrameProcessed
+    userOnFrameProcessed(probs, ...args)
   })
   const { onSpeechEnd, onSpeechStart, onVADMisfire } = vadOptions
   const _onSpeechEnd = useEventCallback(onSpeechEnd)
@@ -149,7 +149,7 @@ export function useMicVAD(options: Partial<ReactRealTimeVADOptions>) {
 
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" &&
-  typeof window.document !== "undefined" &&
-  typeof window.document.createElement !== "undefined"
+    typeof window.document !== "undefined" &&
+    typeof window.document.createElement !== "undefined"
     ? React.useLayoutEffect
     : React.useEffect

@@ -31,7 +31,7 @@ interface RealTimeVADCallbacks {
    * Takes as arg a Float32Array of audio samples between -1 and 1, sample rate 16000.
    * This will not run if the audio segment is smaller than `minSpeechFrames`.
    */
-  onSpeechEnd: (audio: Float32Array) => any
+  onSpeechEnd: (audio: Float32Array, start: number) => any
 }
 
 /**
@@ -252,7 +252,9 @@ export class AudioNodeVAD {
 
   pause = () => {
     const ev = this.frameProcessor.pause()
-    this.handleFrameProcessorEvent(ev)
+    if (ev) {
+      this.handleFrameProcessorEvent(ev)
+    }
   }
 
   start = () => {
@@ -264,8 +266,8 @@ export class AudioNodeVAD {
   }
 
   processFrame = async (frame: Float32Array, audioEv: MessageEvent) => {
-    const ev = await this.frameProcessor.process(frame)
-    this.handleFrameProcessorEvent(ev, audioEv.timeStamp)
+    const ev = await this.frameProcessor.process(frame, audioEv.timeStamp)
+    ev && this.handleFrameProcessorEvent(ev, audioEv.timeStamp)
   }
 
   handleFrameProcessorEvent = (
@@ -274,6 +276,8 @@ export class AudioNodeVAD {
   ) => {
     if ('probs' in ev && ev.probs !== undefined) {
       this.options.onFrameProcessed(ev.probs, ev, stamp)
+    } else {
+      console.info('~skip')
     }
     if (!('msg' in ev)) {
       return
@@ -288,7 +292,7 @@ export class AudioNodeVAD {
         break
 
       case Message.SpeechEnd:
-        this.options.onSpeechEnd(ev.audio as Float32Array)
+        this.options.onSpeechEnd(ev.audio!, ev.startStamp!)
         break
 
       default:

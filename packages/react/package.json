@@ -13,22 +13,27 @@
     "react"
   ],
   "homepage": "https://github.com/songlairui/silero-web-vad",
-  "version": "0.0.23",
+  "version": "0.0.25",
   "license": "ISC",
   "main": "dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "devDependencies": {
-    "@types/react": "^18.0.28"
+    "pkgroll": "^2.1.0",
+    "tsx": "^4.10.5"
   },
   "dependencies": {
-    "@slr/vad-web": "^0.0.18",
+    "@slr/vad-web": "workspace:^",
     "onnxruntime-web": "^1.14.0"
   },
   "peerDependencies": {
+    "@types/react": "^18",
     "react": "^18",
     "react-dom": "^18"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "pkgroll --clean-dist",
+    "tsc": "tsc",
     "clean": "rm -rf dist"
   },
   "author": ""

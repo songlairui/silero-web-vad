@@ -12,16 +12,44 @@
     "offline-speech-recognition"
   ],
   "homepage": "https://github.com/songlairui/silero-web-vad",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "license": "ISC",
   "main": "dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "unpkg": "dist/bundle.min.js",
   "jsdelivr": "dist/bundle.min.js",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
+    },
+    "./worklet": {
+      "require": {
+        "types": "./dist/worklet.d.ts",
+        "default": "./dist/worklet.js"
+      },
+      "import": {
+        "types": "./dist/worklet.d.mts",
+        "default": "./dist/worklet.mjs"
+      }
+    }
+  },
   "devDependencies": {
     "@playwright/test": "^1.30.0",
     "@types/audioworklet": "^0.0.36",
     "@types/express": "^4.17.17",
     "express": "^4.18.2",
+    "pkgroll": "^2.1.0",
+    "tsup": "^8.0.2",
+    "tsx": "^4.10.5",
+    "typescript": "^5.2.2",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1"
   },
@@ -29,7 +57,11 @@
     "onnxruntime-web": "^1.14.0"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
+    "build:core": "pkgroll --clean-dist",
+    "build:worklet": "tsup",
+    "cp_onnx": "cp ../../silero_vad.onnx dist",
+    "build": "npm run build:core && npm run build:worklet && npm run cp_onnx",
+    "build:origin": "./scripts/build.sh",
     "test-server": "tsc -p ./scripts/tsconfig.json && node ./scripts/test-server.js",
     "test": "playwright test",
     "clean": "rm -rf dist"
