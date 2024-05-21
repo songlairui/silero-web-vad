@@ -64,9 +64,9 @@ importers:
 
   packages/react:
     dependencies:
-      '@ricky0123/vad-web':
-        specifier: ^0.0.17
-        version: 0.0.17
+      '@slr/vad-web':
+        specifier: ^0.0.18
+        version: 0.0.18
       onnxruntime-web:
         specifier: ^1.14.0
         version: 1.18.0
@@ -80,6 +80,12 @@ importers:
       '@types/react':
         specifier: ^18.0.28
         version: 18.3.2
+
+  packages/react/ttt:
+    dependencies:
+      '@slr/vad-web':
+        specifier: ^0.0.18
+        version: 0.0.18
 
   packages/web:
     dependencies:
@@ -312,9 +318,6 @@ packages:
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
-  '@ricky0123/vad-web@0.0.17':
-    resolution: {integrity: sha512-yaybStyg/q5UYrwn2IRD3eE1i7KvUh9kpJ+jCqxgv1mpGrhgagTVP9TwjOOIbcwFlq3nflpQqJ27bh+6zAEDlw==}
-
   '@sinonjs/commons@2.0.0':
     resolution: {integrity: sha512-uLa0j859mMrg2slwQYdO/AkrOfmH+X6LTVmNTS9CqexuE2IvVORIkSpJLqePAbEnKJ77aMmCwr1NUZ57120Xcg==}
 
@@ -332,6 +335,9 @@ packages:
 
   '@sinonjs/text-encoding@0.7.2':
     resolution: {integrity: sha512-sXXKG+uL9IrKqViTtao2Ws6dy0znu9sOaP1di/jKGW1M6VssO8vlpXCQcpZ+jisQ1tTFAC5Jo/EOzFbggBagFQ==}
+
+  '@slr/vad-web@0.0.18':
+    resolution: {integrity: sha512-u7uA+XecJHid0YfvIKJW6dGcvmd2AnpG/7gmR9XofPPpVTqVi40qqxvQjq6fYE5TxchHcIOEla3pdCYi0kppmw==}
 
   '@types/audioworklet@0.0.36':
     resolution: {integrity: sha512-aEE9vSGLA6fF4g9zp6Y2q2UE6GWMYliksQ3VSkR+5n87GqbbbeFiFRwoIBvN5ojc5i6lkIeHfzzNhMdQVNiWMg==}
@@ -2299,10 +2305,6 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@ricky0123/vad-web@0.0.17':
-    dependencies:
-      onnxruntime-web: 1.18.0
-
   '@sinonjs/commons@2.0.0':
     dependencies:
       type-detect: 4.0.8
@@ -2326,6 +2328,10 @@ snapshots:
       type-detect: 4.0.8
 
   '@sinonjs/text-encoding@0.7.2': {}
+
+  '@slr/vad-web@0.0.18':
+    dependencies:
+      onnxruntime-web: 1.18.0
 
   '@types/audioworklet@0.0.36': {}
 

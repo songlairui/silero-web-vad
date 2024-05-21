@@ -1,5 +1,5 @@
 {
-  "name": "@slr/silero-vad-web",
+  "name": "@slr/vad-web",
   "description": "modified on @ricky0123/vad-web, Powerful, user-friendly voice activity detector (VAD) for the browser",
   "keywords": [
     "speech-recognition",
