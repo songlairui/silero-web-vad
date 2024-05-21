@@ -13,7 +13,7 @@
     "react"
   ],
   "homepage": "https://github.com/songlairui/silero-web-vad",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "license": "ISC",
   "main": "dist/index.js",
   "module": "./dist/index.mjs",
